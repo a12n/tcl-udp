@@ -25,6 +25,8 @@ AC_CONFIG_AUX_DIR(tclconfig)
 CONFIGDIR=${srcdir}/tclconfig
 AC_SUBST(CONFIGDIR)
 
+dnl# AC_CONFIG_HEADER(config.h)
+
 #----------------------------------------------------------------------
 # __CHANGE__
 # Set your package name and version numbers here.  The NODOT_VERSION is
@@ -35,9 +37,9 @@ AC_SUBST(CONFIGDIR)
 
 PACKAGE=udp
 
-MAJOR_VERSION=1
+MAJOR_VERSION=2
 MINOR_VERSION=0
-PATCHLEVEL=4
+PATCHLEVEL=0
 
 VERSION=${MAJOR_VERSION}.${MINOR_VERSION}.${PATCHLEVEL}
 NODOT_VERSION=${MAJOR_VERSION}${MINOR_VERSION}

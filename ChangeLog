@@ -1,3 +1,81 @@
+2004-02-13  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: An extensive interface rewrite. We now have
+	just a udp command and the socket is controlled via the fconfigure
+	command. This is now a much more similar to the tcl socket
+	command. For backwards compatability, we define the old functions
+	in terms of the new interface.
+	      * * *    INTERFACE INCOMPATABILITY   * * *
+
+	* all:   Created branch dev-2 to hold udp 2.0 development
+	
+2004-02-09  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: Followed up a suggestion from patch #828180
+	to support address reuse using SO_REUSEADDR. Implemented as an
+	fconfigure option on the channel.
+
+	* generic/udp_tcl.c: Followed up a suggestion in patch #794072 to
+	support udp broadcast packets. This can be queried/enabled using
+	fconfigure $s -broadcast ?1|0?
+
+	* generic/udp_tcl.c: Fixes for some errors in the Win32 code
+	in udpClose provided in patch #820255.
+
+	* all:        INCREMENTED VERSION TO 1.0.6
+
+	* generic/udp_tcl.c: Applied fix from bug #833700 to close a
+	memory leak in UDP_CheckProc.
+
+	* Makefile.in: Fixed to build in directories other than the top
+	of the source tree.
+
+	* generic/udp_tcl.c: Applied the patch from bug #810572 which
+	fixes a memory leak in udp_open - from D. Richard Hipp?
+
+	* generic/udp_tcl.h: Fix for missing define WIN32 sometimes.
+	
+	* win/makefile.vc:  Added the standard windows nmake makefiles
+	* win/nmakehlp.c:   from the sampleextension project.
+	* win/rules.vc:     Visual Studio project updated as a Makefile
+	* win/tcludp.dsp:   project.
+
+2003-10-14  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: Fix CONSTness for Tcl < 8.4
+
+2003-06-13  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: Cleaned up some -Wall warnings under unix.
+	* generic/udp_tcl.h:    "         "
+	* win/tcludp.rc:     Updated the version number and fixed line endings
+	* doc/udp.man:          "          "
+
+2003-03-21  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: define ioctlsocket for unix
+
+2003-03-12  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* win/tcludp.dsp:
+	* configure.in: bumped patchlevel to 1.0.5
+
+2003-03-05  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: General layout rearrangement to put tcl
+	command procs, channel handler procs and utility procs together.
+	* generic/udp_tcl.c: Added channel option handlers to enable the
+	use of 'fconfigure' to hopefully replace udp_conf.
+	* generic/udp_tcl.c (udpGetHandle): Fixed to return the handle
+	properly.
+
+2003-03-03  Pat Thoyts  <patthoyts@users.sourceforge.net>
+
+	* generic/udp_tcl.c: Fix include list to use the autoconfig test
+	results. Fixes for CONST Tcl 8.3/8.4 compatability.
+	* genetic/udp_tcl.c: Enhanced udp_open and udp_conf to permit the
+	use of symbolic port names. Added some tests for this.
+
 2003-02-27  Pat Thoyts  <patthoyts@users.sourceforge.net>
 
 	* generic/udp_tcl.c: Stop a crash when udp_conf -remote called
