@@ -6,7 +6,7 @@
  * Copyright (c) 2003-2005 Pat Thoyts <patthoyts@users.sourceforge.net>
  *
  * Written by Xiaotao Wu
- * 
+ *
  * $Id$
  *----------------------------------------------------------------------
  */
