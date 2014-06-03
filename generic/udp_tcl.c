@@ -266,11 +266,14 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
 {
     int sock;
     char channelName[20];
+    char node[256] = "";
+    char service[32] = "0";
     UdpState *statePtr;
     uint16_t localport = 0;
     int reuse = 0;
-	struct sockaddr_storage addr,sockaddr;
-	socklen_t addr_len;
+    struct addrinfo hints;
+    struct addrinfo* info;
+    struct addrinfo* infos;
     unsigned long status = 1;
     socklen_t len;
 	short ss_family = AF_INET; /* Default ipv4 */
@@ -289,13 +292,34 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
  		}
 		/* The remaining option must be the port (if specified) */
 		if (remaining_options == 2) {
-		   if (udpGetService(interp, argv[1], &localport) != TCL_OK) {
-				Tcl_SetResult (interp, errmsg, NULL);
-				return TCL_ERROR;
-		   }
+            int n;
+            const char** v;
+
+            if (Tcl_SplitList(interp, argv[1], &n, &v) == TCL_OK) {
+                if (n == 2) {
+                    strncpy(node, v[0], sizeof(node));
+                    node[sizeof(node) - 1] = '\0';
+                    strncpy(service, v[1], sizeof(service));
+                    service[sizeof(service) - 1] = '\0';
+                    Tcl_Free((char*)v);
+                } else if (n == 1) {
+                    strncpy(service, v[0], sizeof(service));
+                    service[sizeof(service) - 1] = '\0';
+                    Tcl_Free((char*)v);
+                } else {
+                    Tcl_Free((char*)v);
+                    Tcl_SetResult(interp, errmsg, NULL);
+                    return TCL_ERROR;
+                }
+            } else {
+                Tcl_SetResult(interp, errmsg, NULL);
+                return TCL_ERROR;
+            }
 		}
     }
     memset(channelName, 0, sizeof(channelName));
+
+    UDPTRACE("node \"%s\", service \"%s\"\n", node, service);
 
 	sock = socket(ss_family, SOCK_DGRAM, 0);
     if (sock < 0) {
@@ -337,20 +361,35 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
         }
     }
 
-	memset(&addr, 0, sizeof(addr));
-	if (ss_family == AF_INET6) {
-		((struct sockaddr_in6 *) &addr)->sin6_family = AF_INET6;
-		((struct sockaddr_in6 *) &addr)->sin6_port = localport;
-		addr_len = sizeof(struct sockaddr_in6);
-	} else {
-		((struct sockaddr_in *) &addr)->sin_family = AF_INET;
-		((struct sockaddr_in *) &addr)->sin_port = localport;
-		addr_len = sizeof(struct sockaddr_in);
-	}
-	if ( bind(sock,(struct sockaddr *)&addr, addr_len) < 0) {
-        Tcl_SetObjResult(interp,
-                         ErrorToObj("failed to bind socket to port"));
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = ss_family;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = IPPROTO_UDP;
+    hints.ai_flags = AI_PASSIVE;
 
+    if (getaddrinfo((node[0] == '\0') ? NULL : node, service, &hints, &infos) != 0) {
+        closesocket(sock);
+        Tcl_SetResult(interp, "getaddrinfo() failed", TCL_STATIC);
+        return TCL_ERROR;
+    }
+
+    for (info = infos; info != NULL; info = info->ai_next) {
+        if (bind(sock, info->ai_addr, info->ai_addrlen) == 0) {
+            /* Using node buffer */
+            UDPTRACE("Bound to %s\n",
+                     (info->ai_family == AF_INET) ?
+                     inet_ntop(AF_INET, &((struct sockaddr_in*)info->ai_addr)->sin_addr, node, sizeof(node)) :
+                     (info->ai_family == AF_INET6) ?
+                     inet_ntop(AF_INET6, &((struct sockaddr_in6*)info->ai_addr)->sin6_addr, node, sizeof(node)) :
+                     "");
+            break;
+        }
+    }
+
+    freeaddrinfo(infos);
+
+    if (info == NULL) {
+        Tcl_SetResult(interp, "bind() failed", TCL_STATIC);
         closesocket(sock);
         return TCL_ERROR;
     }
@@ -358,6 +397,7 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
     ioctlsocket(sock, FIONBIO, &status);
 
     if (localport == 0) {
+        struct sockaddr_storage sockaddr;
         len = sizeof(sockaddr);
 		getsockname(sock, (struct sockaddr *)&sockaddr, &len);
  		if (ss_family == AF_INET6) {
