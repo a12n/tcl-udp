@@ -238,7 +238,7 @@ Database Class:	\\fB\\$3\\fR
 .de UL
 \\$1\l'|0\(ul'\\$2
 ..
-.TH "udp" n 1.0.10  "Tcl UDP extension"
+.TH "udp" n 1.1.2  "Tcl UDP extension"
 .BS
 .SH NAME
 udp \- Create UDP sockets in Tcl
