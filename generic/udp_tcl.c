@@ -307,8 +307,8 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
                     service[sizeof(service) - 1] = '\0';
                     Tcl_Free((char*)v);
                 } else {
-                    Tcl_Free((char*)v);
                     Tcl_SetResult(interp, errmsg, NULL);
+                    Tcl_Free((char*)v);
                     return TCL_ERROR;
                 }
             } else {
@@ -368,8 +368,8 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
     hints.ai_flags = AI_PASSIVE;
 
     if (getaddrinfo((node[0] == '\0') ? NULL : node, service, &hints, &infos) != 0) {
-        closesocket(sock);
         Tcl_SetResult(interp, "getaddrinfo() failed", TCL_STATIC);
+        closesocket(sock);
         return TCL_ERROR;
     }
 
