@@ -274,7 +274,7 @@ udpOpen(ClientData clientData, Tcl_Interp *interp,
     unsigned long status = 1;
     socklen_t len;
 	short ss_family = AF_INET; /* Default ipv4 */
-	char errmsg[] = "upd_open [remoteport] [ipv6] [reuse]";
+	char errmsg[] = "upd_open [localaddr] [ipv6] [reuse]";
 	int remaining_options = argc;
 
     if (argc >= 2) {
